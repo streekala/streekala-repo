@@ -10,7 +10,6 @@ import { Container } from "./container";
 
 const EMAIL = "streekalabydimple7977@gmail.com";
 
-// TODO: replace the hrefs with your real pages / policy URLs
 const LINK_GROUPS = [
   {
     title: "Explore More",
@@ -40,7 +39,7 @@ const SOCIAL_LINKS = [
 ];
 
 const linkClass =
-  "text-sm text-muted-foreground transition-colors hover:text-primary";
+  "text-xs md:text-sm text-muted-foreground transition-colors hover:text-primary";
 
 export default function Footer() {
   return (
@@ -71,7 +70,7 @@ export default function Footer() {
               </p>
 
               {/* Social icons */}
-              <ul className="flex items-center gap-4">
+              <ul className="flex items-center gap-2 md:gap-4">
                 {SOCIAL_LINKS.map(({ label, href, icon: Icon }) => (
                   <li key={label}>
                     <a
@@ -93,12 +92,12 @@ export default function Footer() {
               <nav
                 key={group.title}
                 aria-label={group.title}
-                className="flex flex-col items-start gap-4"
+                className="flex flex-col items-start gap-2 md:gap-4"
               >
-                <h3 className="text-lg font-medium text-foreground">
+                <h3 className="text-base md:text-lg font-medium text-foreground">
                   {group.title}
                 </h3>
-                <ul className="flex flex-col gap-2">
+                <ul className="flex flex-col md:gap-2">
                   {group.links.map((link) => (
                     <li key={link.label}>
                       <Link className={linkClass} href={link.href}>
@@ -111,12 +110,12 @@ export default function Footer() {
             ))}
 
             {/* ── Contact ── */}
-            <div className="flex flex-col items-start gap-4">
-              <h3 className="text-lg font-medium text-foreground">
+            <div className="flex flex-col items-start gap-2 md:gap-4">
+              <h3 className="text-base md:text-lg font-medium text-foreground">
                 Contact Us
               </h3>
               <a
-                className={`${linkClass} flex items-start gap-2 break-all`}
+                className={`${linkClass} flex items-center gap-2 break-all`}
                 href={`mailto:${EMAIL}`}
               >
                 <IconMail size={18} stroke={1.5} className="mt-0.5 shrink-0" />

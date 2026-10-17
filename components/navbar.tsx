@@ -32,7 +32,7 @@ const iconButtonClass =
 
 const Navbar = () => {
   return (
-    <nav className="w-full border-b border-border bg-background px-4 py-2 shadow-sm md:px-6">
+    <nav className="w-full border-b border-border bg-background px-4 py-2 md:px-6">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         {/* Left Section: Hamburger (mobile) / Nav Links (desktop) */}
         <div className="flex flex-1 items-center justify-start">

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import Image, { getImageProps } from "next/image"
+import{ getImageProps } from "next/image"
 import Autoplay from "embla-carousel-autoplay"
 import {
   Carousel,
@@ -74,7 +74,7 @@ const HeroCarousel = ({ slides }: { slides: Slide[] }) => {
           {slides.map((slide, index) => (
             <CarouselItem key={slide.id} className="pl-0">
               {/* Mobile: 4:5 portrait, Desktop: 21:9 wide */}
-              <div className="relative aspect-4/6 w-full md:aspect-21/9">
+              <div className="relative aspect-4/6 w-full md:aspect-21/12 lg:aspect-21/9">
                 <SlideImage slide={slide} priority={index === 0} />
               </div>
             </CarouselItem>
