@@ -28,17 +28,17 @@ const NewArrivals = () => {
     <Container className="mx-auto">
       <div className="flex w-full flex-col gap-8 sm:gap-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <p className="text-xs font-medium uppercase tracking-[0.13em] text-muted-foreground">
               New arrivals
             </p>
-            <h2 className="text-xl font-medium sm:text-2xl text-foreground">
+            <h2 className="text-xl font-medium sm:text-xl text-foreground">
               Discover the latest styles
             </h2>
           </div>
           <Link
             href="/shop"
-            className="w-fit text-[15px] uppercase tracking-[0.08em] text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
+            className="w-fit text-xs uppercase tracking-[0.08em] text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
           >
             Shop new arrivals
           </Link>

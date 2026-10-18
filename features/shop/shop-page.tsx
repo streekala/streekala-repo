@@ -5,6 +5,7 @@ import { ProductCard } from "./product-card";
 import ShopHero from "./shop-hero";
 import { PRODUCTS } from "../constant";
 import { Container } from "@/components/container";
+import Link from "next/link";
 
 export default function ShopPage() {
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
@@ -41,7 +42,13 @@ export default function ShopPage() {
             {visibleProducts.length > 0 ? (
               <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 md:grid-cols-4 sm:gap-x-4">
                 {visibleProducts.slice(0, visibleCount).map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <Link
+                    href={`/product/${product.id}`}
+                    key={product.id}
+                    className="group min-w-0"
+                  >
+                    <ProductCard product={product} />
+                  </Link>
                 ))}
               </div>
             ) : (

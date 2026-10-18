@@ -42,17 +42,17 @@ const TrendingSection = () => {
     <Container className="mx-auto">
       <div className="flex w-full flex-col gap-8 sm:gap-10">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <p className="text-xs font-medium uppercase tracking-[0.13em] text-muted-foreground">
               Best trending deals
             </p>
-            <h2 className="text-xl font-medium text-foreground sm:text-2xl">
+            <h2 className="text-xl font-medium text-foreground sm:text-xl">
               Styles everyone is loving
             </h2>
           </div>
           <Link
             href="/shop"
-            className="w-fit text-[15px] uppercase tracking-[0.08em] text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
+            className="w-fit text-xs uppercase tracking-[0.08em] text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
           >
             Shop all deals
           </Link>

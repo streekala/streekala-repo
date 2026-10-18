@@ -1,5 +1,5 @@
 export type Product = {
-  id: string;
+  id: number;
   image: string;
   alt: string;
   label?: string;
@@ -11,7 +11,7 @@ export type Product = {
 
 export const PRODUCTS: Product[] = [
   {
-    id: "loungewear",
+    id: 1,
     image: "/trending-img-1.webp",
     alt: "Woman wearing a printed loungewear set",
     label: "Loungewear",
@@ -21,7 +21,7 @@ export const PRODUCTS: Product[] = [
     category: "Festive Wear",
   },
   {
-    id: "co-ords",
+    id: 2,
     image: "/trending-img-4.webp",
     alt: "Woman wearing a printed co-ord set",
     label: "Co-ords",
@@ -31,7 +31,7 @@ export const PRODUCTS: Product[] = [
     category: "Daily Casual",
   },
   {
-    id: "floral-kurta",
+    id: 3,
     image: "/trending-img-2.webp",
     alt: "Woman wearing a green floral kurta",
     label: "New",
@@ -41,7 +41,7 @@ export const PRODUCTS: Product[] = [
     category: "Wedding Guest",
   },
   {
-    id: "plus-sizes",
+    id: 4,
     image: "/trending-img-5.webp",
     alt: "Woman wearing a plus size floral kurta",
     label: "Plus Sizes",
@@ -51,7 +51,7 @@ export const PRODUCTS: Product[] = [
     category: "Festive Wear",
   },
   {
-    id: "sarees",
+    id: 5,
     image: "/trending-img-3.webp",
     alt: "Woman wearing an elegant gold saree",
     label: "Sarees",

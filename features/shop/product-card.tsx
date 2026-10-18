@@ -11,7 +11,7 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <article className="group min-w-0">
-      <div className="relative aspect-[0.9] overflow-hidden border-y border-border bg-primary/foreground">
+      <div className="relative aspect-4/6 md:aspect-[0.9] overflow-hidden border-y border-border bg-primary/foreground">
         <Image
           src={product.image}
           alt={product.alt}

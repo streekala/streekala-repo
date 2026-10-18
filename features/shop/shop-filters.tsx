@@ -4,8 +4,8 @@ import { useState } from "react";
 import { FILTER_OPTIONS } from "../constant";
 
 type ShopFiltersProps = {
-  selectedOccasions: string[];
-  onOccasionsChange: (occasions: string[]) => void;
+  selectedOccasions?: string[];
+  onOccasionsChange?: (occasions: string[]) => void;
 };
 
 export function ShopFilters({
@@ -15,10 +15,11 @@ export function ShopFilters({
   const [selectedSize, setSelectedSize] = useState("M");
 
   const toggleOccasion = (occasion: string) => {
+    if (!onOccasionsChange) return;
     onOccasionsChange(
-      selectedOccasions.includes(occasion)
+      selectedOccasions?.includes(occasion)
         ? selectedOccasions.filter((item) => item !== occasion)
-        : [...selectedOccasions, occasion],
+        : [...(selectedOccasions || []), occasion],
     );
   };
 
@@ -32,7 +33,7 @@ export function ShopFilters({
           type="button"
           onClick={() => {
             setSelectedSize("M");
-            onOccasionsChange([]);
+            onOccasionsChange?.([]);
           }}
           className="text-[10px] md:text-xs cursor-pointer uppercase tracking-[0.08em] text-stone-600 underline underline-offset-2 transition-colors hover:text-primary"
         >
@@ -93,7 +94,7 @@ export function ShopFilters({
               >
                 <input
                   type="checkbox"
-                  checked={selectedOccasions.includes(occasion)}
+                  checked={selectedOccasions?.includes(occasion)}
                   onChange={() => toggleOccasion(occasion)}
                   className="accent-primary"
                 />
