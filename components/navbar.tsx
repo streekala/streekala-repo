@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -15,6 +17,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useCartStore } from "@/stores/cart-store";
+import CartSheet from "@/features/product/cart-sheet";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -24,13 +28,16 @@ const navLinks = [
 const accountLinks = [
   { href: "/account", label: "Account", icon: IconUserCircle },
   { href: "/wishlist", label: "Wishlist", icon: IconHeart },
-  { href: "/cart", label: "Cart", icon: IconShoppingBag },
 ];
 
 const iconButtonClass =
   "p-1.5 text-muted-foreground transition-colors hover:text-primary";
 
 const Navbar = () => {
+  const cartOpen = useCartStore((state) => state.isCartOpen);
+  const setCartOpen = useCartStore((state) => state.setCartOpen);
+  const itemCount = useCartStore((state) => state.itemCount);
+
   return (
     <nav className="w-full border-b border-border bg-background px-4 py-2 md:px-6">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
@@ -86,6 +93,13 @@ const Navbar = () => {
                       </SheetClose>
                     </li>
                   ))}
+                  <button
+                    type="button"
+                    onClick={() => setCartOpen(true)}
+                    className={`${iconButtonClass} relative`}
+                  >
+                    <IconShoppingBag size={26} stroke={1.5} />
+                  </button>
                 </ul>
               </div>
             </SheetContent>
@@ -124,11 +138,7 @@ const Navbar = () => {
 
         {/* Right Section: Action Icons */}
         <div className="flex flex-1 items-center justify-end gap-1 md:gap-4">
-          <button
-            type="button"
-            aria-label="Search"
-            className={iconButtonClass}
-          >
+          <button type="button" aria-label="Search" className={iconButtonClass}>
             <IconSearch size={26} stroke={1.5} />
           </button>
 
@@ -149,15 +159,23 @@ const Navbar = () => {
             <IconHeart size={26} stroke={1.5} />
           </Link>
 
-          <Link
-            href="/cart"
+          <button
+            type="button"
             aria-label="Shopping Bag"
-            className={`${iconButtonClass} relative`}
+            onClick={() => setCartOpen(true)}
+            className={`${iconButtonClass} relative hover:cursor-pointer`}
           >
             <IconShoppingBag size={26} stroke={1.5} />
-          </Link>
+            {itemCount > 0 && (
+              <span
+                aria-hidden="true"
+                className="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary ring-2 ring-background"
+              />
+            )}
+          </button>
         </div>
       </div>
+      <CartSheet open={cartOpen} onOpenChange={setCartOpen} />
     </nav>
   );
 };

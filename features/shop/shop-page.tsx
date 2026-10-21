@@ -3,31 +3,24 @@
 import { useMemo, useState } from "react";
 import { ProductCard } from "./product-card";
 import ShopHero from "./shop-hero";
-import { PRODUCTS } from "../constant";
 import { Container } from "@/components/container";
 import Link from "next/link";
+import type { Product } from "@/lib/products";
 
-export default function ShopPage() {
-  const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
+export default function ShopPage({ products }: { products: Product[] }) {
   const [sort, setSort] = useState("featured");
   const [visibleCount, setVisibleCount] = useState(6);
 
   const visibleProducts = useMemo(() => {
-    const filtered = selectedOccasions.length
-      ? PRODUCTS.filter((product) =>
-          selectedOccasions.includes(product.category),
-        )
-      : PRODUCTS;
-
-    return [...filtered].sort((a, b) => {
+    return [...products].sort((a, b) => {
       if (sort === "price-low" || sort === "price-high") {
-        const aPrice = Number(a.price.replace(/[^\d]/g, ""));
-        const bPrice = Number(b.price.replace(/[^\d]/g, ""));
+        const aPrice = a.price;
+        const bPrice = b.price;
         return sort === "price-low" ? aPrice - bPrice : bPrice - aPrice;
       }
       return 0;
     });
-  }, [selectedOccasions, sort]);
+  }, [products, sort]);
 
   return (
     <Container className="mx-auto">
@@ -43,7 +36,7 @@ export default function ShopPage() {
               <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 md:grid-cols-4 sm:gap-x-4">
                 {visibleProducts.slice(0, visibleCount).map((product) => (
                   <Link
-                    href={`/product/${product.id}`}
+                    href={`/product/${product.handle}`}
                     key={product.id}
                     className="group min-w-0"
                   >

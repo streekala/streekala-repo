@@ -3,8 +3,18 @@
 import Image from "next/image";
 import { IconHeart } from "@tabler/icons-react";
 import { useState } from "react";
-import { Product } from "../constant";
 import { Button } from "@/components/ui/button";
+
+export type Product = {
+  id: string;
+  name: string;
+  category: string;
+  image: string;
+  alt: string;
+  description: string;
+  price: number;
+  label?: string;
+};
 
 export function ProductCard({ product }: { product: Product }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -35,8 +45,7 @@ export function ProductCard({ product }: { product: Product }) {
         </button>
       </div>
       <h3 className="mt-2 text-xs font-medium text-card-foreground">{product.name}</h3>
-      <p className="text-[10px] text-muted-foreground">{product.description}</p>
-      <p className="mt-1 text-xs font-medium text-primary">{product.price}</p>
+      <p className="mt-1 text-xs font-medium text-primary">₹ {product.price.toLocaleString("en-IN")}</p>
       <Button
         type="button"
         variant="outline"

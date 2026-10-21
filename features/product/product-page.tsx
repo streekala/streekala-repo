@@ -3,12 +3,14 @@ import ProductGallery from "./product-gallery";
 import ProductInfo from "./product-info";
 import { Container } from "@/components/container";
 import RelatedSection from "./related-section";
+import type { ProductDetail } from "@/lib/products";
 
-export default function ProductPage() {
+export default function ProductPage({ product }: { product: ProductDetail }) {
+
   return (
     <Container className="mx-auto">
-      <div className="w-full flex flex-col gap-4 md:gap-10">
-        <div className="mx-auto md:max-w-6xl pb-10 flex flex-col gap-4">
+      <div className="w-full flex flex-col gap-12 md:gap-16 md:px-16">
+        <div className="flex flex-col gap-4">
           <nav
             aria-label="Breadcrumb"
             className="flex items-center gap-2 text-xs text-muted-foreground"
@@ -25,8 +27,8 @@ export default function ProductPage() {
           </nav>
 
           <div className="grid gap-7 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
-            <ProductGallery />
-            <ProductInfo />
+            <ProductGallery images={product.images} />
+            <ProductInfo product={product} />
           </div>
         </div>
         <RelatedSection />

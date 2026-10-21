@@ -8,9 +8,13 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { productImages } from "./constant";
 
-export default function ProductGallery() {
+type GalleryImage = {
+  src: string;
+  alt: string;
+};
+
+export default function ProductGallery({ images }: { images: GalleryImage[] }) {
   const [selectedImage, setSelectedImage] = useState(0);
 
   // Mobile carousel state
@@ -29,7 +33,7 @@ export default function ProductGallery() {
       <div className="md:hidden">
         <Carousel setApi={setApi} opts={{ loop: false }}>
           <CarouselContent className="ml-0">
-            {productImages.map((image, index) => (
+            {images.map((image, index) => (
               <CarouselItem key={image.src} className="pl-0">
                 <div className="relative aspect-3/4 w-full overflow-hidden bg-muted">
                   <Image
@@ -51,7 +55,7 @@ export default function ProductGallery() {
 
         {/* Dots */}
         <div className="mt-3 flex justify-center gap-2">
-          {productImages.map((image, index) => (
+          {images.map((image, index) => (
             <button
               key={image.src}
               type="button"
@@ -69,7 +73,7 @@ export default function ProductGallery() {
       {/* ── Desktop (md and up): thumbnails + main image (unchanged) ── */}
       <div className="hidden gap-3 md:flex lg:gap-4">
         <div className="flex w-14 shrink-0 flex-col gap-3 sm:w-16">
-          {productImages.map((image, index) => (
+          {images.map((image, index) => (
             <button
               key={image.src}
               type="button"
@@ -77,7 +81,9 @@ export default function ProductGallery() {
               aria-pressed={selectedImage === index}
               onClick={() => setSelectedImage(index)}
               className={`relative aspect-4/5 overflow-hidden border bg-muted transition-colors ${
-                selectedImage === index ? "border-primary" : "border-transparent"
+                selectedImage === index
+                  ? "border-primary"
+                  : "border-transparent"
               }`}
             >
               <Image
@@ -92,8 +98,8 @@ export default function ProductGallery() {
         </div>
         <div className="relative aspect-3/4 min-w-0 flex-1 overflow-hidden bg-muted">
           <Image
-            src={productImages[selectedImage].src}
-            alt={productImages[selectedImage].alt}
+            src={images[selectedImage].src}
+            alt={images[selectedImage].alt}
             fill
             priority
             sizes="(min-width: 1024px) 44vw, (min-width: 768px) 85vw, 100vw"
