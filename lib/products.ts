@@ -28,12 +28,41 @@ type ShopifyProductsResponse = {
                 amount: string;
                 currencyCode: string;
               };
+              compareAtPrice: {
+                amount: string;
+                currencyCode: string;
+              } | null;
             };
           }[];
         };
       };
     }[];
   };
+};
+
+type ShopifyCollectionsResponse = {
+  collections: {
+    edges: {
+      node: {
+        id: string;
+        title: string;
+        handle: string;
+        description: string;
+        image: {
+          url: string;
+          altText: string | null;
+        } | null;
+      };
+    }[];
+  };
+};
+
+type ShopifyCollectionProductsResponse = {
+  collection: {
+    title: string;
+    description: string;
+    products: ShopifyProductsResponse["products"];
+  } | null;
 };
 
 export type Product = {
@@ -48,12 +77,15 @@ export type Product = {
   category: string;
   price: number;
   currency: string;
+  compareAtPrice: number | null;
+  discountPercentage: number | null;
   variants: {
     id: string;
     title: string;
     availableForSale: boolean;
     price: number;
     currency: string;
+    compareAtPrice: number | null;
   }[];
 };
 
@@ -78,10 +110,51 @@ export type ProductDetail = {
   }[];
 };
 
-export async function getProducts(): Promise<Product[]> {
+export type Collection = {
+  id: string;
+  title: string;
+  handle: string;
+  description: string;
+  image: string;
+  imageAlt: string;
+};
+
+export async function getCollections(first = 3): Promise<Collection[]> {
   const query = `
-    query GetProducts {
-      products(first: 20) {
+    query GetCollections($first: Int!) {
+      collections(first: $first) {
+        edges {
+          node {
+            id
+            title
+            handle
+            description
+            image {
+              url
+              altText
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const data = await shopifyFetch<ShopifyCollectionsResponse>(query, { first });
+
+  return data.collections.edges.map(({ node }) => ({
+    id: node.id,
+    title: node.title,
+    handle: node.handle,
+    description: node.description,
+    image: node.image?.url ?? "/images/placeholder.png",
+    imageAlt: node.image?.altText ?? node.title,
+  }));
+}
+
+export async function getProducts(collectionHandle?: string): Promise<Product[]> {
+  const query = `
+    query GetProducts($query: String) {
+      products(first: 20, query: $query) {
         edges {
           node {
             id
@@ -108,6 +181,10 @@ export async function getProducts(): Promise<Product[]> {
                     amount
                     currencyCode
                   }
+                  compareAtPrice {
+                    amount
+                    currencyCode
+                  }
                 }
               }
             }
@@ -117,9 +194,27 @@ export async function getProducts(): Promise<Product[]> {
     }
   `;
 
-  const data = await shopifyFetch<ShopifyProductsResponse>(query);
+  const data = await shopifyFetch<ShopifyProductsResponse>(query, {
+    query: collectionHandle ? `collection:${collectionHandle}` : undefined,
+  });
 
-  return data.products.edges.map(({ node }) => ({
+  return data.products.edges.map(({ node }) => {
+    const price = Number(node.priceRange.minVariantPrice.amount);
+    const compareAtPrice = node.variants.edges.reduce<number | null>(
+      (highestCompareAtPrice, { node: variant }) => {
+        const variantCompareAtPrice = variant.compareAtPrice
+          ? Number(variant.compareAtPrice.amount)
+          : null;
+
+        if (variantCompareAtPrice === null) return highestCompareAtPrice;
+        return highestCompareAtPrice === null
+          ? variantCompareAtPrice
+          : Math.max(highestCompareAtPrice, variantCompareAtPrice);
+      },
+      null
+    );
+
+    return {
     id: node.id,
     title: node.title,
     name: node.title,
@@ -129,16 +224,133 @@ export async function getProducts(): Promise<Product[]> {
     imageAlt: node.featuredImage?.altText ?? node.title,
     alt: node.featuredImage?.altText ?? node.title,
     category: "Suits",
-    price: Number(node.priceRange.minVariantPrice.amount),
+    price,
     currency: node.priceRange.minVariantPrice.currencyCode,
+    compareAtPrice,
+    discountPercentage:
+      compareAtPrice && compareAtPrice > price
+        ? Math.round(((compareAtPrice - price) / compareAtPrice) * 100)
+        : null,
     variants: node.variants.edges.map(({ node: variant }) => ({
       id: variant.id,
       title: variant.title,
       availableForSale: variant.availableForSale,
       price: Number(variant.price.amount),
       currency: variant.price.currencyCode,
+      compareAtPrice: variant.compareAtPrice
+        ? Number(variant.compareAtPrice.amount)
+        : null,
     })),
-  }));
+    };
+  });
+}
+
+export async function getCollectionByHandle(handle: string): Promise<{
+  title: string;
+  description: string;
+  products: Product[];
+} | null> {
+  const query = `
+    query GetCollectionProducts($handle: String!) {
+      collection(handle: $handle) {
+        title
+        description
+        products(first: 250) {
+          edges {
+            node {
+              id
+              title
+              handle
+              description
+              featuredImage {
+                url
+                altText
+              }
+              priceRange {
+                minVariantPrice {
+                  amount
+                  currencyCode
+                }
+              }
+              variants(first: 20) {
+                edges {
+                  node {
+                    id
+                    title
+                    availableForSale
+                    price {
+                      amount
+                      currencyCode
+                    }
+                    compareAtPrice {
+                      amount
+                      currencyCode
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const data = await shopifyFetch<ShopifyCollectionProductsResponse>(query, {
+    handle,
+  });
+
+  if (!data.collection) return null;
+
+  return {
+    title: data.collection.title,
+    description: data.collection.description,
+    products: data.collection.products.edges.map(({ node }) => {
+      const price = Number(node.priceRange.minVariantPrice.amount);
+      const compareAtPrice = node.variants.edges.reduce<number | null>(
+        (highestCompareAtPrice, { node: variant }) => {
+          const variantCompareAtPrice = variant.compareAtPrice
+            ? Number(variant.compareAtPrice.amount)
+            : null;
+
+          if (variantCompareAtPrice === null) return highestCompareAtPrice;
+          return highestCompareAtPrice === null
+            ? variantCompareAtPrice
+            : Math.max(highestCompareAtPrice, variantCompareAtPrice);
+        },
+        null
+      );
+
+      return {
+      id: node.id,
+      title: node.title,
+      name: node.title,
+      handle: node.handle,
+      description: node.description,
+      image: node.featuredImage?.url ?? "/images/placeholder.png",
+      imageAlt: node.featuredImage?.altText ?? node.title,
+      alt: node.featuredImage?.altText ?? node.title,
+      category: "Suits",
+      price,
+      currency: node.priceRange.minVariantPrice.currencyCode,
+      compareAtPrice,
+      discountPercentage:
+        compareAtPrice && compareAtPrice > price
+          ? Math.round(((compareAtPrice - price) / compareAtPrice) * 100)
+          : null,
+      variants: node.variants.edges.map(({ node: variant }) => ({
+        id: variant.id,
+        title: variant.title,
+        availableForSale: variant.availableForSale,
+        price: Number(variant.price.amount),
+        currency: variant.price.currencyCode,
+        compareAtPrice: variant.compareAtPrice
+          ? Number(variant.compareAtPrice.amount)
+          : null,
+      })),
+      };
+    }),
+  };
 }
 
 

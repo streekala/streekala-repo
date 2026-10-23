@@ -1,29 +1,11 @@
 import { Container } from "@/components/container";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
+import { getCollections } from "@/lib/products";
 
-const arrivals = [
-  {
-    image: "/new-arrivals-1.webp",
-    alt: "Cotton dress pattern inspiration",
-    title: "Cotton Dress Patterns",
-    description: "Explore breathable elegance",
-  },
-  {
-    image: "/new-arrivals-2.webp",
-    alt: "Stylish midi dress inspiration",
-    title: "Stylish Midi Dresses",
-    description: "Versatile styles for every occasion",
-  },
-  {
-    image: "/new-arrivals-3.webp",
-    alt: "Ethnic wear hairstyle inspiration",
-    title: "Ethnic Wear Classics",
-    description: "Traditional charm with modern grace",
-  },
-];
+const NewArrivals = async () => {
+  const collections = await getCollections();
 
-const NewArrivals = () => {
   return (
     <Container className="mx-auto">
       <div className="flex w-full flex-col gap-8 sm:gap-10">
@@ -45,12 +27,16 @@ const NewArrivals = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 md:grid-cols-3">
-          {arrivals.map((arrival) => (
-            <Link href="/shop" key={arrival.image} className="group block">
-              <div className="relative aspect-4/5 overflow-hidden bg-muted">
+          {collections.map((collection) => (
+            <Link
+              href={`/collection/${encodeURIComponent(collection.handle)}`}
+              key={collection.id}
+              className="group block"
+            >
+              <div className="relative aspect-5/5 overflow-hidden bg-muted">
                 <Image
-                  src={arrival.image}
-                  alt={arrival.alt}
+                  src={collection.image}
+                  alt={collection.imageAlt}
                   fill
                   sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-[1.06]"
@@ -60,11 +46,11 @@ const NewArrivals = () => {
                 </span>
               </div>
               <h3 className="mt-3 text-base font-medium leading-6 text-card-foreground">
-                {arrival.title}
+                {collection.title}
               </h3>
-              <p className="text-sm leading-6 text-muted-foreground">
-                {arrival.description}
-              </p>
+              {/* <p className="text-sm leading-6 text-muted-foreground">
+                {collection.description || "Explore the latest styles"}
+              </p> */}
             </Link>
           ))}
         </div>
