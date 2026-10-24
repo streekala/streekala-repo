@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import {
   IconHeart,
   IconMenu2,
@@ -34,9 +35,17 @@ const iconButtonClass =
   "p-1.5 text-muted-foreground transition-colors hover:text-primary";
 
 const Navbar = () => {
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const cartOpen = useCartStore((state) => state.isCartOpen);
   const setCartOpen = useCartStore((state) => state.setCartOpen);
   const itemCount = useCartStore((state) => state.itemCount);
+
+  useEffect(() => {
+    fetch("/api/account/status", { credentials: "same-origin" })
+      .then((response) => response.json() as Promise<{ authenticated: boolean }>)
+      .then((result) => setAuthenticated(result.authenticated))
+      .catch(() => setAuthenticated(false));
+  }, []);
 
   return (
     <nav className="w-full border-b border-border bg-background px-4 py-2 md:px-6">
@@ -143,13 +152,9 @@ const Navbar = () => {
           </button>
 
           {/* Account + Wishlist: desktop only (they live in the menu on mobile) */}
-          <Link
-            href="/account"
-            aria-label="User Account"
-            className={`${iconButtonClass} hidden md:inline-flex`}
-          >
-            <IconUserCircle size={26} stroke={1.5} />
-          </Link>
+          <div className="hidden md:inline-flex">
+            <AccountMenu authenticated={authenticated} />
+          </div>
 
           <Link
             href="/wishlist"
@@ -179,5 +184,54 @@ const Navbar = () => {
     </nav>
   );
 };
+
+function AccountMenu({ authenticated }: { authenticated: boolean | null }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function close(event: MouseEvent) {
+      if (!ref.current?.contains(event.target as Node)) setOpen(false);
+    }
+    function escape(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", escape);
+    };
+  }, []);
+
+  if (authenticated !== true) {
+    return (
+      <Link href="/account" aria-label="User Account" className={iconButtonClass}>
+        <IconUserCircle size={26} stroke={1.5} />
+      </Link>
+    );
+  }
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        aria-label="Open account menu"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+        className={iconButtonClass}
+      >
+        <IconUserCircle size={26} stroke={1.5} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full z-50 mt-2 w-44 rounded-lg border border-border bg-popover p-1 text-sm shadow-lg">
+          <Link href="/account/profile" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 hover:bg-muted">My Profile</Link>
+          <Link href="/account/orders" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 hover:bg-muted">My Orders</Link>
+          <Link href="/account/logout" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 hover:bg-muted">Logout</Link>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default Navbar;

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:https": "next dev --experimental-https --hostname local.tryhydrogen.dev --port 3000",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -16,6 +17,7 @@
     "cn": "^0.4.0",
     "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
+    "jose": "^6.2.13",
     "lucide-react": "^1.57.0",
     "next": "16.4.1",
     "react": "19.3.0",
