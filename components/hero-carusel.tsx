@@ -1,74 +1,85 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useState } from "react"
-import{ getImageProps } from "next/image"
-import Autoplay from "embla-carousel-autoplay"
+import { useEffect, useState } from "react";
+import { getImageProps } from "next/image";
+import Autoplay from "embla-carousel-autoplay";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   type CarouselApi,
-} from "@/components/ui/carousel"
+} from "@/components/ui/carousel";
 
 type Slide = {
-  id: number
-  image: string // desktop image
-  mobileImage: string // mobile image
-  alt: string
-  title: string
-  subtitle: string
-  href: string
-  cta: string
-}
+  id: number;
+  image: string; // desktop image
+  mobileImage: string; // mobile image
+  alt: string;
+  title: string;
+  subtitle: string;
+  href: string;
+  cta: string;
+};
 
 // Renders a <picture>: mobile image by default, desktop image from 768px up (Tailwind `md`).
 // The browser downloads only ONE of them.
-const SlideImage = ({ slide, priority }: { slide: Slide; priority: boolean }) => {
+const SlideImage = ({
+  slide,
+  priority,
+}: {
+  slide: Slide;
+  priority: boolean;
+}) => {
   const common = {
     alt: slide.alt,
     fill: true,
     sizes: "100vw",
     priority,
-  }
+  };
 
   const {
     props: { srcSet: desktopSrcSet },
-  } = getImageProps({ ...common, src: slide.image, quality: 80 })
+  } = getImageProps({ ...common, src: slide.image, quality: 80 });
 
   const {
     props: { srcSet: mobileSrcSet, ...mobileProps },
-  } = getImageProps({ ...common, src: slide.mobileImage, quality: 75 })
+  } = getImageProps({ ...common, src: slide.mobileImage, quality: 75 });
 
   return (
     <picture>
       <source media="(min-width: 768px)" srcSet={desktopSrcSet} />
       <source srcSet={mobileSrcSet} />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {}
       <img {...mobileProps} alt={slide.alt} className="object-cover" />
     </picture>
-  )
-}
+  );
+};
 
 const HeroCarousel = ({ slides }: { slides: Slide[] }) => {
-  const [api, setApi] = useState<CarouselApi>()
-  const [current, setCurrent] = useState(0)
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
 
-  const autoplay = useRef(
+  const [autoplayPlugin] = useState(() =>
     Autoplay({ delay: 5000, stopOnInteraction: false })
   )
 
   useEffect(() => {
-    if (!api) return
-    setCurrent(api.selectedScrollSnap())
-    api.on("select", () => setCurrent(api.selectedScrollSnap()))
-  }, [api])
+    if (!api) return;
+    const onSelect = () => {
+      setCurrent(api.selectedScrollSnap());
+    };
+    api.on("select", onSelect);
+    return () => {
+      api.off("select", onSelect);
+    };
+  }, [api]);
 
   return (
     <div className="relative">
       <Carousel
         setApi={setApi}
         opts={{ loop: true }}
-        plugins={[autoplay.current]}
+        plugins={[autoplayPlugin]}
       >
         <CarouselContent className="ml-0">
           {slides.map((slide, index) => (
@@ -89,13 +100,15 @@ const HeroCarousel = ({ slides }: { slides: Slide[] }) => {
             onClick={() => api?.scrollTo(i)}
             aria-label={`Go to slide ${i + 1}`}
             className={`h-2 rounded-full transition-all ${
-              i === current ? "w-6 bg-secondary" : "w-2 bg-primary-foreground/60"
+              i === current
+                ? "w-6 bg-secondary"
+                : "w-2 bg-primary-foreground/60"
             }`}
           />
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default HeroCarousel
+export default HeroCarousel;
