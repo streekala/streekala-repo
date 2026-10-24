@@ -1,15 +1,9 @@
 "use client";
 
-import { IconHeart } from "@tabler/icons-react";
 import { useState } from "react";
 import ProductBenefits from "./product-benefits";
 import { ProductSizeFilter } from "./product-size-filter";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   Accordion,
   AccordionContent,
@@ -19,6 +13,7 @@ import {
 import CartSheet from "./cart-sheet";
 import type { ProductDetail } from "@/lib/products";
 import { useCartStore } from "@/stores/cart-store";
+import WishlistButton from "@/components/wishlist-button";
 
 export default function ProductInfo({ product }: { product: ProductDetail }) {
   const sizes = Array.from(
@@ -41,7 +36,6 @@ export default function ProductInfo({ product }: { product: ProductDetail }) {
       ),
     ) ?? product.variants[0];
 
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [cartError, setCartError] = useState("");
 
@@ -144,34 +138,9 @@ export default function ProductInfo({ product }: { product: ProductDetail }) {
                 : "Add to cart"}
           </Button>
 
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <button
-                  type="button"
-                  aria-label={
-                    isWishlisted ? "Remove from wishlist" : "Add to wishlist"
-                  }
-                  aria-pressed={isWishlisted}
-                  onClick={() => setIsWishlisted((value) => !value)}
-                  className={`flex h-10 w-10 items-center justify-center border hover:cursor-pointer ${
-                    isWishlisted
-                      ? "border-[#870d18] text-[#870d18]"
-                      : "border-[#ad7b7d] text-[#870d18]"
-                  }`}
-                >
-                  <IconHeart
-                    size={17}
-                    stroke={1.4}
-                    fill={isWishlisted ? "currentColor" : "none"}
-                  />
-                </button>
-              }
-            />
-            <TooltipContent>
-              <p>{isWishlisted ? "Remove from wishlist" : "Add to wishlist"}</p>
-            </TooltipContent>
-          </Tooltip>
+          <div className="h-10 w-10 flex items-center justify-center border border-primary bg-card">
+            <WishlistButton productId={product.id} />
+          </div>
         </div>
 
         {cartError && (

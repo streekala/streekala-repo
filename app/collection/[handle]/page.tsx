@@ -2,7 +2,7 @@ import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Container } from "@/components/container";
-import { ProductCard } from "@/features/shop/product-card";
+import { ProductCard } from "@/components/product-card";
 import { getCollectionByHandle } from "@/lib/products";
 
 export const instant = false;
