@@ -1,3 +1,4 @@
+"use client"
 import { useTRPC } from "@/trpc/client";
 import { IconHeart, IconHeartFilled } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

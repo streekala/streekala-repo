@@ -65,8 +65,8 @@ export default function AccountPage() {
 
   const login = mode === "login";
   return (
-    <main className="flex-1 px-4 py-10 sm:px-6 lg:px-8 lg:py-20">
-      <section className="mx-auto max-w-md space-y-8 rounded-xl border border-border bg-card p-6 sm:p-10">
+    <main className="min-h-screen flex-1 flex flex-col justify-center items-center px-4 pb-40 sm:px-6 lg:px-8 lg:py-20 lg:pb-40">
+      <section className="mx-auto max-w-md space-y-8 border border-border bg-card p-6 sm:p-10">
         <div>
           <p className="text-xs uppercase tracking-[0.22em] text-primary">
             Welcome to Streekala
