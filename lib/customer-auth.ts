@@ -300,6 +300,15 @@ export async function verifyIdToken(idToken: string, config: Discovery, nonce: s
   return result.payload;
 }
 
+export async function verifyLogoutIdToken(idToken: string, config: Discovery) {
+  const result = await jwtVerify(idToken, createRemoteJWKSet(new URL(config.jwks_uri)), {
+    issuer: config.issuer,
+    audience: required("NEXT_PUBLIC_SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID"),
+  });
+  if (typeof result.payload.sub !== "string") throw new Error("Invalid logout identity.");
+  return result.payload;
+}
+
 export function equal(left: string, right: string) {
   const a = Buffer.from(left);
   const b = Buffer.from(right);
