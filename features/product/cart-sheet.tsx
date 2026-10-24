@@ -1,8 +1,9 @@
+
 "use client";
 
 import Image from "next/image";
 import { IconMinus, IconPlus, IconTrash, IconX } from "@tabler/icons-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   Sheet,
   SheetClose,
@@ -44,7 +45,10 @@ type CartSheetProps = {
   currency?: string;
 };
 
-export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
+export default function CartSheet({
+  open,
+  onOpenChange,
+}: CartSheetProps) {
   const [cart, setCart] = useState<ShopifyCart | null>(null);
   const [loading, setLoading] = useState(false);
   const [busyLine, setBusyLine] = useState<string | null>(null);
@@ -52,21 +56,24 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
 
   const setItemCount = useCartStore((state) => state.setItemCount);
 
-  const requestCart = useCallback(async (payload: Record<string, unknown>) => {
-    const response = await fetch("/api/cart", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+  const requestCart = useCallback(
+    async (payload: Record<string, unknown>) => {
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    const result = await response.json();
+      const result = await response.json();
 
-    if (!response.ok) {
-      throw new Error(result.error ?? "Unable to update your cart.");
-    }
+      if (!response.ok) {
+        throw new Error(result.error ?? "Unable to update your cart.");
+      }
 
-    return result.cart as ShopifyCart;
-  }, []);
+      return result.cart as ShopifyCart;
+    },
+    []
+  );
 
   const loadCart = useCallback(async () => {
     const cartId = localStorage.getItem("shopify_cart_id");
@@ -74,6 +81,8 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
     if (!cartId) {
       setCart(null);
       setItemCount(0);
+      setLoading(false);
+      setError("");
       return;
     }
 
@@ -86,20 +95,12 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
       setItemCount(nextCart.totalQuantity);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Unable to load your cart.",
+        err instanceof Error ? err.message : "Unable to load your cart."
       );
     } finally {
       setLoading(false);
     }
-  }, [requestCart]);
-
-  useEffect(() => {
-    void loadCart();
-  }, [loadCart]);
-
-  useEffect(() => {
-    if (open) void loadCart();
-  }, [open, loadCart]);
+  }, [requestCart, setItemCount]);
 
   async function updateQuantity(line: CartLine, quantity: number) {
     if (!cart || quantity < 1 || quantity > 99) return;
@@ -119,7 +120,7 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
       setItemCount(nextCart.totalQuantity);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Unable to update quantity.",
+        err instanceof Error ? err.message : "Unable to update quantity."
       );
     } finally {
       setBusyLine(null);
@@ -143,7 +144,7 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
       setItemCount(nextCart.totalQuantity);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Unable to remove this item.",
+        err instanceof Error ? err.message : "Unable to remove this item."
       );
     } finally {
       setBusyLine(null);
@@ -168,7 +169,16 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
     }).format(amount);
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet
+      open={open}
+      onOpenChange={(nextOpen) => {
+        onOpenChange(nextOpen);
+
+        if (nextOpen) {
+          void loadCart();
+        }
+      }}
+    >
       <SheetContent
         side="right"
         showCloseButton={false}
@@ -215,7 +225,7 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
               <div className="space-y-7">
                 {lines.map((line) => {
                   const size = line.merchandise.selectedOptions.find(
-                    (option) => option.name.toLowerCase() === "size",
+                    (option) => option.name.toLowerCase() === "size"
                   )?.value;
 
                   return (
@@ -319,7 +329,7 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
             )}
           </div>
 
-          <div className="shrink-0 border-t border-[#dedede] px-6 pb-9 pt-4 flex flex-col gap-6">
+          <div className="flex shrink-0 flex-col gap-6 border-t border-[#dedede] px-6 pb-9 pt-4">
             <div className="space-y-3 text-xs tracking-[0.12em] text-[#2e292a]">
               <div className="flex justify-between">
                 <span>SUBTOTAL</span>

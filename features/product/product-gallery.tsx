@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -14,7 +15,11 @@ type GalleryImage = {
   alt: string;
 };
 
-export default function ProductGallery({ images }: { images: GalleryImage[] }) {
+export default function ProductGallery({
+  images,
+}: {
+  images: GalleryImage[];
+}) {
   const [selectedImage, setSelectedImage] = useState(0);
 
   // Mobile carousel state
@@ -23,17 +28,30 @@ export default function ProductGallery({ images }: { images: GalleryImage[] }) {
 
   useEffect(() => {
     if (!api) return;
-    setCurrent(api.selectedScrollSnap());
-    api.on("select", () => setCurrent(api.selectedScrollSnap()));
+
+    const onSelect = () => {
+      setCurrent(api.selectedScrollSnap());
+    };
+
+    api.on("select", onSelect);
+
+    return () => {
+      api.off("select", onSelect);
+    };
   }, [api]);
+
+  // Handle an empty image list safely.
+  if (images.length === 0) {
+    return null;
+  }
 
   return (
     <>
-      {/* ── Mobile (below md): swipeable carousel ── */}
+      {/* Mobile: swipeable carousel */}
       <div className="md:hidden">
         <Carousel setApi={setApi} opts={{ loop: false }}>
           <CarouselContent className="ml-0">
-            {images.map((image, index) => (
+            {images.map((image) => (
               <CarouselItem key={image.src} className="pl-0">
                 <div className="relative aspect-3/4 w-full overflow-hidden bg-muted">
                   <Image
@@ -42,9 +60,6 @@ export default function ProductGallery({ images }: { images: GalleryImage[] }) {
                     fill
                     sizes="100vw"
                     className="object-cover"
-                    // No `priority` here: this block is hidden on desktop, and
-                    // priority images load even when hidden. The first slide is in
-                    // view on mobile, so lazy loading still fetches it immediately.
                     loading="lazy"
                   />
                 </div>
@@ -53,7 +68,7 @@ export default function ProductGallery({ images }: { images: GalleryImage[] }) {
           </CarouselContent>
         </Carousel>
 
-        {/* Dots */}
+        {/* Mobile pagination dots */}
         <div className="mt-3 flex justify-center gap-2">
           {images.map((image, index) => (
             <button
@@ -61,7 +76,7 @@ export default function ProductGallery({ images }: { images: GalleryImage[] }) {
               type="button"
               onClick={() => api?.scrollTo(index)}
               aria-label={`Go to image ${index + 1}`}
-              aria-current={current === index}
+              aria-current={current === index ? "true" : undefined}
               className={`h-2 rounded-full transition-all ${
                 current === index ? "w-6 bg-primary" : "w-2 bg-border"
               }`}
@@ -70,7 +85,7 @@ export default function ProductGallery({ images }: { images: GalleryImage[] }) {
         </div>
       </div>
 
-      {/* ── Desktop (md and up): thumbnails + main image (unchanged) ── */}
+      {/* Desktop: thumbnails + main image */}
       <div className="hidden gap-3 md:flex lg:gap-4">
         <div className="flex w-14 shrink-0 flex-col gap-3 sm:w-16">
           {images.map((image, index) => (
@@ -96,6 +111,7 @@ export default function ProductGallery({ images }: { images: GalleryImage[] }) {
             </button>
           ))}
         </div>
+
         <div className="relative aspect-3/4 min-w-0 flex-1 overflow-hidden bg-muted">
           <Image
             src={images[selectedImage].src}

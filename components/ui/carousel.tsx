@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -24,13 +25,16 @@ type CarouselProps = {
 type CarouselContextProps = {
   carouselRef: ReturnType<typeof useEmblaCarousel>[0]
   api: ReturnType<typeof useEmblaCarousel>[1]
+  opts?: CarouselOptions
+  orientation?: "horizontal" | "vertical"
   scrollPrev: () => void
   scrollNext: () => void
   canScrollPrev: boolean
   canScrollNext: boolean
-} & CarouselProps
+}
 
-const CarouselContext = React.createContext<CarouselContextProps | null>(null)
+const CarouselContext =
+  React.createContext<CarouselContextProps | null>(null)
 
 function useCarousel() {
   const context = React.useContext(CarouselContext)
@@ -40,6 +44,37 @@ function useCarousel() {
   }
 
   return context
+}
+
+function useCanScroll(api: CarouselApi, direction: "prev" | "next") {
+  const subscribe = React.useCallback(
+    (onStoreChange: () => void) => {
+      if (!api) return () => {}
+
+      api.on("select", onStoreChange)
+      api.on("reInit", onStoreChange)
+
+      return () => {
+        api.off("select", onStoreChange)
+        api.off("reInit", onStoreChange)
+      }
+    },
+    [api]
+  )
+
+  const getSnapshot = React.useCallback(() => {
+    if (!api) return false
+
+    return direction === "prev"
+      ? api.canScrollPrev()
+      : api.canScrollNext()
+  }, [api, direction])
+
+  return React.useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    () => false
+  )
 }
 
 function Carousel({
@@ -58,14 +93,9 @@ function Carousel({
     },
     plugins
   )
-  const [canScrollPrev, setCanScrollPrev] = React.useState(false)
-  const [canScrollNext, setCanScrollNext] = React.useState(false)
 
-  const onSelect = React.useCallback((api: CarouselApi) => {
-    if (!api) return
-    setCanScrollPrev(api.canScrollPrev())
-    setCanScrollNext(api.canScrollNext())
-  }, [])
+  const canScrollPrev = useCanScroll(api, "prev")
+  const canScrollNext = useCanScroll(api, "next")
 
   const scrollPrev = React.useCallback(() => {
     api?.scrollPrev()
@@ -90,28 +120,17 @@ function Carousel({
 
   React.useEffect(() => {
     if (!api || !setApi) return
+
     setApi(api)
   }, [api, setApi])
-
-  React.useEffect(() => {
-    if (!api) return
-    onSelect(api)
-    api.on("reInit", onSelect)
-    api.on("select", onSelect)
-
-    return () => {
-      api?.off("select", onSelect)
-    }
-  }, [api, onSelect])
 
   return (
     <CarouselContext.Provider
       value={{
         carouselRef,
-        api: api,
+        api,
         opts,
-        orientation:
-          orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
+        orientation,
         scrollPrev,
         scrollNext,
         canScrollPrev,
@@ -132,7 +151,10 @@ function Carousel({
   )
 }
 
-function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
+function CarouselContent({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   const { carouselRef, orientation } = useCarousel()
 
   return (
@@ -153,7 +175,10 @@ function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
+function CarouselItem({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   const { orientation } = useCarousel()
 
   return (
