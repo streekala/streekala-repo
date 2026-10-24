@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { TRPCReactProvider } from "@/trpc/client";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -26,11 +27,13 @@ export default function RootLayout({
       <body
         className={`${poppins.className} min-h-full flex flex-col bg-background`}
       >
-        <TooltipProvider>
-          <Navbar />
-          {children}
-          <Footer />
-        </TooltipProvider>
+        <TRPCReactProvider>
+          <TooltipProvider>
+            <Navbar />
+            {children}
+            <Footer />
+          </TooltipProvider>
+        </TRPCReactProvider>
       </body>
     </html>
   );

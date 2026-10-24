@@ -1,9 +1,6 @@
-"use client";
-
 import Image from "next/image";
-import { IconHeart } from "@tabler/icons-react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import WishlistButton from "@/components/wishlist-button";
 
 export type Product = {
   id: string;
@@ -17,8 +14,6 @@ export type Product = {
 };
 
 export function ProductCard({ product }: { product: Product }) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
-
   return (
     <article className="group min-w-0">
       <div className="relative aspect-4/6 md:aspect-[0.9] overflow-hidden border-y border-border bg-primary/foreground">
@@ -34,18 +29,16 @@ export function ProductCard({ product }: { product: Product }) {
             {product.label}
           </span>
         )}
-        <button
-          type="button"
-          aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
-          aria-pressed={isWishlisted}
-          onClick={() => setIsWishlisted((value) => !value)}
-          className="absolute bottom-2 right-2 rounded-full bg-primary-foreground p-1.5 text-primary transition-colors hover:text-primary hover:cursor-pointer"
-        >
-          <IconHeart size={18} stroke={1.5} fill={isWishlisted ? "currentColor" : "none"} />
-        </button>
+        <div className="absolute h-10 w-10 flex items-center justify-center bottom-2 right-2 z-10 bg-card">
+          <WishlistButton productId={product.id} />
+        </div>
       </div>
-      <h3 className="mt-2 text-xs font-medium text-card-foreground">{product.name}</h3>
-      <p className="mt-1 text-xs font-medium text-primary">₹ {product.price.toLocaleString("en-IN")}</p>
+      <h3 className="mt-2 text-xs font-medium text-card-foreground">
+        {product.name}
+      </h3>
+      <p className="mt-1 text-xs font-medium text-primary">
+        ₹ {product.price.toLocaleString("en-IN")}
+      </p>
       <Button
         type="button"
         variant="outline"

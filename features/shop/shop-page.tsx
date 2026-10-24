@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ProductCard } from "./product-card";
+import { ProductCard } from "../../components/product-card";
 import ShopHero from "./shop-hero";
 import { Container } from "@/components/container";
 import Link from "next/link";

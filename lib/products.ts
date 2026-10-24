@@ -40,6 +40,10 @@ type ShopifyProductsResponse = {
   };
 };
 
+type ShopifyNodesResponse = {
+  nodes: (ShopifyProductsResponse["products"]["edges"][number]["node"] | null)[];
+};
+
 type ShopifyCollectionsResponse = {
   collections: {
     edges: {
@@ -151,10 +155,13 @@ export async function getCollections(first = 3): Promise<Collection[]> {
   }));
 }
 
-export async function getProducts(collectionHandle?: string): Promise<Product[]> {
+export async function getProducts(
+  collectionHandle?: string,
+  productQuery?: string,
+): Promise<Product[]> {
   const query = `
     query GetProducts($query: String) {
-      products(first: 20, query: $query) {
+      products(first: ${productQuery ? 250 : 20}, query: $query) {
         edges {
           node {
             id
@@ -165,6 +172,7 @@ export async function getProducts(collectionHandle?: string): Promise<Product[]>
               url
               altText
             }
+
             priceRange {
               minVariantPrice {
                 amount
@@ -195,7 +203,9 @@ export async function getProducts(collectionHandle?: string): Promise<Product[]>
   `;
 
   const data = await shopifyFetch<ShopifyProductsResponse>(query, {
-    query: collectionHandle ? `collection:${collectionHandle}` : undefined,
+    query:
+      productQuery ??
+      (collectionHandle ? `collection:${collectionHandle}` : undefined),
   });
 
   return data.products.edges.map(({ node }) => {
@@ -242,6 +252,106 @@ export async function getProducts(collectionHandle?: string): Promise<Product[]>
         : null,
     })),
     };
+  });
+}
+
+export async function getProductsByIds(ids: string[]): Promise<Product[]> {
+  if (ids.length === 0) return [];
+
+  const query = `
+    query GetWishlistProducts($ids: [ID!]!) {
+      nodes(ids: $ids) {
+        ... on Product {
+          id
+          title
+          handle
+          description
+          featuredImage {
+            url
+            altText
+          }
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          variants(first: 20) {
+            edges {
+              node {
+                id
+                title
+                availableForSale
+                price {
+                  amount
+                  currencyCode
+                }
+                compareAtPrice {
+                  amount
+                  currencyCode
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const data = await shopifyFetch<ShopifyNodesResponse>(query, { ids });
+  const products = data.nodes
+    .filter((node): node is NonNullable<typeof node> => node !== null)
+    .map((node) => {
+      const price = Number(node.priceRange.minVariantPrice.amount);
+      const compareAtPrice = node.variants.edges.reduce<number | null>(
+        (highestCompareAtPrice, { node: variant }) => {
+          const variantCompareAtPrice = variant.compareAtPrice
+            ? Number(variant.compareAtPrice.amount)
+            : null;
+
+          if (variantCompareAtPrice === null) return highestCompareAtPrice;
+          return highestCompareAtPrice === null
+            ? variantCompareAtPrice
+            : Math.max(highestCompareAtPrice, variantCompareAtPrice);
+        },
+        null,
+      );
+
+      return {
+        id: node.id,
+        title: node.title,
+        name: node.title,
+        handle: node.handle,
+        description: node.description,
+        image: node.featuredImage?.url ?? "/images/placeholder.png",
+        imageAlt: node.featuredImage?.altText ?? node.title,
+        alt: node.featuredImage?.altText ?? node.title,
+        category: "Suits",
+        price,
+        currency: node.priceRange.minVariantPrice.currencyCode,
+        compareAtPrice,
+        discountPercentage:
+          compareAtPrice && compareAtPrice > price
+            ? Math.round(((compareAtPrice - price) / compareAtPrice) * 100)
+            : null,
+        variants: node.variants.edges.map(({ node: variant }) => ({
+          id: variant.id,
+          title: variant.title,
+          availableForSale: variant.availableForSale,
+          price: Number(variant.price.amount),
+          currency: variant.price.currencyCode,
+          compareAtPrice: variant.compareAtPrice
+            ? Number(variant.compareAtPrice.amount)
+            : null,
+        })),
+      };
+    });
+
+  const productsById = new Map(products.map((product) => [product.id, product]));
+
+  return ids.flatMap((id) => {
+    const product = productsById.get(id);
+    return product ? [product] : [];
   });
 }
 
