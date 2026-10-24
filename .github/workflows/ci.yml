@@ -46,5 +46,21 @@ jobs:
       - name: Run TypeScript checks
         run: pnpm run typecheck
 
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+
       - name: Build application
         run: pnpm run build
+        env:
+          # Placeholder so modules that read env vars at import time don't
+          # throw during `next build`. postgres() doesn't connect until the
+          # first query, so no real database is needed here.
+          DATABASE_URL: postgresql://user:pass@localhost:5432/ci
+          # Add dummy values for any other required env vars from your .env
+          # (for example a session/JWT secret used by customer-auth):
+          # SESSION_SECRET: ci-dummy-secret-not-for-production
