@@ -1,17 +1,23 @@
-
+import { Suspense } from "react";
+import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
 import { searchProducts } from "@/lib/search-products";
-import Link from "next/link";
 
 type SearchPageProps = {
-  searchParams: Promise<{
-    q?: string;
-  }>;
+  searchParams: Promise<{ q?: string }>;
 };
 
-export default async function SearchPage({
-  searchParams,
-}: SearchPageProps) {
+export default function SearchPage({ searchParams }: SearchPageProps) {
+  return (
+    <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <Suspense fallback={<SearchSkeleton />}>
+        <SearchResults searchParams={searchParams} />
+      </Suspense>
+    </main>
+  );
+}
+
+async function SearchResults({ searchParams }: SearchPageProps) {
   const { q } = await searchParams;
   const query = q?.trim() ?? "";
 
@@ -28,7 +34,7 @@ export default async function SearchPage({
   }));
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <>
       <h1 className="text-2xl font-semibold">
         {query ? `Search results for "${query}"` : "Search products"}
       </h1>
@@ -49,7 +55,6 @@ export default async function SearchPage({
           <p className="mt-2 text-sm text-muted-foreground">
             {products.length} matching products
           </p>
-
           <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {cardProducts.map((product) => (
               <Link
@@ -59,11 +64,23 @@ export default async function SearchPage({
               >
                 <ProductCard product={product} />
               </Link>
-              
             ))}
           </div>
         </>
       )}
-    </main>
+    </>
+  );
+}
+
+function SearchSkeleton() {
+  return (
+    <div>
+      <div className="h-8 w-64 animate-pulse rounded bg-muted" />
+      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="aspect-3/4 animate-pulse rounded bg-muted" />
+        ))}
+      </div>
+    </div>
   );
 }

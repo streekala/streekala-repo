@@ -1,4 +1,3 @@
-import Link from "next/link";
 import ProductGallery from "./product-gallery";
 import ProductInfo from "./product-info";
 import { Container } from "@/components/container";
