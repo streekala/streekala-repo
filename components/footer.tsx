@@ -25,6 +25,7 @@ const LINK_GROUPS = [
       { label: "Shipping & Returns", href: "/shipping-returns" },
       { label: "Order Tracking", href: "/order-tracking" },
       { label: "FAQs", href: "/faqs" },
+      { label: "Contact Us", href: "/contact" },
       { label: "Terms & Conditions", href: "/terms" },
       { label: "Privacy Policy", href: "/privacy-policy" },
     ],
