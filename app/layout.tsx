@@ -30,7 +30,6 @@ export const metadata: Metadata = {
     "Indian fashion",
     "women's clothing",
     "Streekala",
-    "online fashion India",
   ],
   alternates: {
     canonical: "/",
