@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import { LegalPage, type LegalSection } from "@/components/legal-page";
+import { createPageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Terms & Conditions | Streekala",
-  description: "Review the terms that apply when you use the Streekala website and shop with us.",
-};
+export const metadata: Metadata = createPageMetadata({
+  title: "Terms and Conditions",
+  description:
+    "Review the terms that apply when you use the Streekala website, place an order, and shop our women's fashion.",
+  path: "/terms",
+  keywords: ["Streekala terms and conditions", "online shopping terms"],
+});
 
 const sections: LegalSection[] = [
   {

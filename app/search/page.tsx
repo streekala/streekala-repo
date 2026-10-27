@@ -2,10 +2,31 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
 import { searchProducts } from "@/lib/search-products";
+import { createPageMetadata } from "@/lib/metadata";
+import type { Metadata } from "next";
 
 type SearchPageProps = {
   searchParams: Promise<{ q?: string }>;
 };
+
+export async function generateMetadata({
+  searchParams,
+}: SearchPageProps): Promise<Metadata> {
+  const { q } = await searchParams;
+  const query = q?.trim();
+
+  return createPageMetadata({
+    title: query ? `Search Results for ${query}` : "Search Women's Fashion",
+    description: query
+      ? `Browse Streekala search results for ${query}. Discover women's fashion and contemporary Indian styles.`
+      : "Search Streekala for women's clothing, contemporary Indian fashion, and your next favorite style.",
+    path: "/search",
+    keywords: query
+      ? [query, `${query} women's fashion`, "Streekala"]
+      : ["search women's fashion", "find Streekala products"],
+    noIndex: true,
+  });
+}
 
 export default function SearchPage({ searchParams }: SearchPageProps) {
   return (

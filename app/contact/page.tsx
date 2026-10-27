@@ -4,11 +4,15 @@ import { Container } from "@/components/container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { createPageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Contact Us | Streekala",
-  description: "Get in touch with the Streekala team about products, orders, and styling.",
-};
+export const metadata: Metadata = createPageMetadata({
+  title: "Contact Streekala",
+  description:
+    "Get in touch with Streekala for help with products, orders, sizing, styling, and your shopping experience.",
+  path: "/contact",
+  keywords: ["contact Streekala", "Streekala customer support", "fashion styling help"],
+});
 
 const contactDetails = [
   {

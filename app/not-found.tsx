@@ -2,6 +2,15 @@ import Link from "next/link";
 import { IconArrowLeft, IconHome } from "@tabler/icons-react";
 import { Container } from "@/components/container";
 import { Button } from "@/components/ui/button";
+import { createPageMetadata } from "@/lib/metadata";
+
+export const metadata = createPageMetadata({
+  title: "Page Not Found",
+  description:
+    "The Streekala page you requested could not be found. Explore our women's fashion collection instead.",
+  path: "/404",
+  noIndex: true,
+});
 
 export default function NotFound() {
   return (
