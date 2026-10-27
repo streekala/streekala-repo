@@ -5,6 +5,16 @@ import { Suspense } from "react";
 import { Container } from "@/components/container";
 import { validSession } from "@/lib/customer-auth";
 import { WishlistContent } from "./wishlist-content";
+import { createPageMetadata } from "@/lib/metadata";
+
+export const metadata = createPageMetadata({
+  title: "Your Streekala Wishlist",
+  description:
+    "Save your favorite Streekala women's fashion pieces and revisit them whenever you are ready to shop.",
+  path: "/wishlist",
+  keywords: ["Streekala wishlist", "save women's fashion"],
+  noIndex: true,
+});
 
 export default function WishlistPage() {
   return (

@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Container } from "@/components/container";
+import { createPageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "FAQs | Streekala",
-  description: "Find answers to common questions about Streekala products, orders, shipping, and returns.",
-};
+export const metadata: Metadata = createPageMetadata({
+  title: "FAQs About Shopping at Streekala",
+  description:
+    "Find answers about Streekala products, sizing, delivery, payments, returns, exchanges, and order tracking.",
+  path: "/faqs",
+  keywords: ["Streekala FAQs", "fashion delivery India", "returns and exchanges"],
+});
 
 const faqs = [
   {

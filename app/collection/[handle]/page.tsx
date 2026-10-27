@@ -4,8 +4,41 @@ import Link from "next/link";
 import { Container } from "@/components/container";
 import { ProductCard } from "@/components/product-card";
 import { getCollectionByHandle } from "@/lib/products";
+import { createPageMetadata } from "@/lib/metadata";
+import type { Metadata } from "next";
 
 export const instant = false;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ handle: string }>;
+}): Promise<Metadata> {
+  const { handle } = await params;
+  const collection = await getCollectionByHandle(handle);
+
+  if (!collection) {
+    return createPageMetadata({
+      title: "Collection Not Found",
+      description: "The Streekala collection you requested could not be found.",
+      path: `/collection/${handle}`,
+      noIndex: true,
+    });
+  }
+
+  return createPageMetadata({
+    title: `${collection.title} Collection`,
+    description:
+      collection.description ||
+      `Explore the ${collection.title} collection from Streekala, featuring thoughtfully designed women's fashion.`,
+    path: `/collection/${handle}`,
+    keywords: [
+      collection.title,
+      `${collection.title} women's fashion`,
+      "Streekala collection",
+    ],
+  });
+}
 
 export default async function CollectionPage({
   params,
