@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import { IconMinus, IconPlus, IconTrash, IconX } from "@tabler/icons-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Sheet,
   SheetClose,
@@ -102,6 +102,10 @@ export default function CartSheet({
     }
   }, [requestCart, setItemCount]);
 
+  useEffect(() => {
+    queueMicrotask(() => void loadCart());
+  }, [loadCart, open]);
+
   async function updateQuantity(line: CartLine, quantity: number) {
     if (!cart || quantity < 1 || quantity > 99) return;
 
@@ -171,13 +175,7 @@ export default function CartSheet({
   return (
     <Sheet
       open={open}
-      onOpenChange={(nextOpen) => {
-        onOpenChange(nextOpen);
-
-        if (nextOpen) {
-          void loadCart();
-        }
-      }}
+      onOpenChange={onOpenChange}
     >
       <SheetContent
         side="right"

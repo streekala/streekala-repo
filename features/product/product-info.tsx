@@ -10,7 +10,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import CartSheet from "./cart-sheet";
 import type { ProductDetail } from "@/lib/products";
 import { useCartStore } from "@/stores/cart-store";
 import WishlistButton from "@/components/wishlist-button";
@@ -42,7 +41,6 @@ export default function ProductInfo({ product }: { product: ProductDetail }) {
   const selectedPrice = selectedVariant?.price ?? product.price;
   const selectedCurrency = selectedVariant?.currency ?? product.currency;
 
-  const cartOpen = useCartStore((state) => state.isCartOpen);
   const setCartOpen = useCartStore((state) => state.setCartOpen);
   // const itemCount = useCartStore((state) => state.itemCount);
 
@@ -167,13 +165,6 @@ export default function ProductInfo({ product }: { product: ProductDetail }) {
           </div>
         </div>
       </div>
-      <CartSheet
-        open={cartOpen}
-        onOpenChange={setCartOpen}
-        size={selectedSize}
-        price={selectedPrice}
-        currency={selectedCurrency}
-      />
     </section>
   );
 }

@@ -1,8 +1,9 @@
-"use client"
+"use client";
+
 import { useTRPC } from "@/trpc/client";
 import { IconHeart, IconHeartFilled } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React from "react";
+import { useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 interface WishlistButtonProps {
@@ -12,36 +13,51 @@ interface WishlistButtonProps {
 const WishlistButton = ({ productId }: WishlistButtonProps) => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const wishlistQuery = useQuery(
     trpc.wishlist.isInWishlist.queryOptions({ productId }),
   );
 
   const refreshWishlist = async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({
-        queryKey: trpc.wishlist.getAll.queryKey(),
-      }),
-      queryClient.invalidateQueries({
-        queryKey: trpc.wishlist.isInWishlist.queryKey({
-          productId,
+    setIsRefreshing(true);
+
+    try {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: trpc.wishlist.getAll.queryKey(),
         }),
-      }),
-    ]);
+        queryClient.invalidateQueries({
+          queryKey: trpc.wishlist.isInWishlist.queryKey({
+            productId,
+          }),
+        }),
+      ]);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const createMutation = useMutation(
-    trpc.wishlist.create.mutationOptions({ onSuccess: refreshWishlist }),
+    trpc.wishlist.create.mutationOptions({
+      onSuccess: refreshWishlist,
+    }),
   );
+
   const deleteMutation = useMutation(
-    trpc.wishlist.delete.mutationOptions({ onSuccess: refreshWishlist }),
+    trpc.wishlist.delete.mutationOptions({
+      onSuccess: refreshWishlist,
+    }),
   );
 
   const isSaved = wishlistQuery.data?.isSaved ?? false;
-  const isPending = createMutation.isPending || deleteMutation.isPending;
+  const isPending =
+    createMutation.isPending ||
+    deleteMutation.isPending ||
+    isRefreshing;
 
   const toggleWishlist = () => {
-    if (isPending) return;
+    if (isPending || wishlistQuery.isLoading) return;
 
     if (isSaved) {
       deleteMutation.mutate({ productId });
@@ -58,15 +74,34 @@ const WishlistButton = ({ productId }: WishlistButtonProps) => {
             type="button"
             aria-label={isSaved ? "Remove from wishlist" : "Add to wishlist"}
             aria-pressed={isSaved}
+            disabled={isPending || wishlistQuery.isLoading}
             onClick={toggleWishlist}
-            className="hover:cursor-pointer"
+            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isSaved ?  <IconHeartFilled size={18} stroke={1.5} className="text-[#870d18]" /> : <IconHeart size={18} stroke={1.5} />}
+            {isSaved ? (
+              <IconHeartFilled
+                size={18}
+                stroke={1.5}
+                className="text-primary"
+              />
+            ) : (
+              <IconHeart
+                size={18}
+                stroke={1.5}
+                className="text-primary"
+              />
+            )}
           </button>
         }
       />
       <TooltipContent>
-        <p>{isSaved ? "Remove from wishlist" : "Add to wishlist"}</p>
+        <p>
+          {isPending
+            ? "Updating wishlist..."
+            : isSaved
+              ? "Remove from wishlist"
+              : "Add to wishlist"}
+        </p>
       </TooltipContent>
     </Tooltip>
   );

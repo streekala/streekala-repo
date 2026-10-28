@@ -10,6 +10,7 @@ import {
   IconSearch,
   IconShoppingBag,
   IconUserCircle,
+  IconUser,
 } from "@tabler/icons-react";
 import {
   Sheet,
@@ -22,6 +23,9 @@ import {
 import { useCartStore } from "@/stores/cart-store";
 import CartSheet from "@/features/product/cart-sheet";
 import { useRouter } from "next/navigation";
+import { cn } from "cn";
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -45,6 +49,11 @@ const Navbar = () => {
   const cartOpen = useCartStore((state) => state.isCartOpen);
   const setCartOpen = useCartStore((state) => state.setCartOpen);
   const itemCount = useCartStore((state) => state.itemCount);
+  const trpc = useTRPC();
+
+  const wishlistQuery = useQuery(trpc.wishlist.getAll.queryOptions());
+
+  const wishlistItems = wishlistQuery.data ?? [];
 
   useEffect(() => {
     fetch("/api/account/status", { credentials: "same-origin" })
@@ -76,181 +85,185 @@ const Navbar = () => {
 
   return (
     <>
-    <nav className="w-full border-b border-border bg-background px-4 py-2 md:px-6">
-      <div className="mx-auto flex max-w-7xl items-center justify-between">
-        {/* Left Section: Hamburger (mobile) / Nav Links (desktop) */}
-        <div className="flex flex-1 items-center justify-start">
-          {/* Mobile menu */}
-          <Sheet>
-            <SheetTrigger
-              aria-label="Open menu"
-              className={`${iconButtonClass} md:hidden`}
-            >
-              <IconMenu2 size={26} stroke={1.5} />
-            </SheetTrigger>
+      <nav className="w-full border-b border-border bg-background px-4 py-2 md:px-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
+          {/* Left Section: Hamburger (mobile) / Nav Links (desktop) */}
+          <div className="flex flex-1 items-center justify-start">
+            {/* Mobile menu */}
+            <Sheet>
+              <SheetTrigger
+                aria-label="Open menu"
+                className={`${iconButtonClass} md:hidden`}
+              >
+                <IconMenu2 size={26} stroke={1.5} />
+              </SheetTrigger>
 
-            <SheetContent side="right" className="w-75 sm:w-85.5">
-              <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
-              </SheetHeader>
+              <SheetContent side="right" className="w-75 sm:w-85.5">
+                <SheetHeader>
+                  <SheetTitle>Menu</SheetTitle>
+                </SheetHeader>
 
-              <div className="flex flex-col px-4">
-                <ul className="flex flex-col">
-                  {navLinks.map((link) => (
-                    <li key={link.href}>
-                      <SheetClose
-                        nativeButton={false}
-                        render={
-                          <Link
-                            href={link.href}
-                            className="block border-b border-border py-3 text-base font-medium text-foreground transition-colors hover:text-primary"
-                          />
-                        }
-                      >
-                        {link.label}
-                      </SheetClose>
-                    </li>
-                  ))}
-                </ul>
+                <div className="flex flex-col px-4">
+                  <ul className="flex flex-col">
+                    {navLinks.map((link) => (
+                      <li key={link.href}>
+                        <SheetClose
+                          nativeButton={false}
+                          render={
+                            <Link
+                              href={link.href}
+                              className="block border-b border-border py-3 text-base font-medium text-foreground transition-colors hover:text-primary"
+                            />
+                          }
+                        >
+                          {link.label}
+                        </SheetClose>
+                      </li>
+                    ))}
+                  </ul>
 
-                {/* Account Links in mobile */}
-                <ul className="mt-6 flex flex-col gap-1">
-                  {accountLinks.map(({ href, label, icon: Icon }) => (
-                    <li key={href}>
-                      <SheetClose
-                        nativeButton={false}
-                        render={
-                          <Link
-                            href={href}
-                            className="flex items-center gap-3 py-2.5 text-base text-muted-foreground transition-colors hover:text-primary"
-                          />
-                        }
-                      >
-                        <Icon size={22} stroke={1.5} />
-                        {label}
-                      </SheetClose>
-                    </li>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => setCartOpen(true)}
-                    className={`${iconButtonClass} relative -ml-2 flex flex-row items-center gap-2.5`}
+                  {/* Account Links in mobile */}
+                  <ul className="mt-6 flex flex-col gap-1">
+                    {accountLinks.map(({ href, label, icon: Icon }) => (
+                      <li key={href}>
+                        <SheetClose
+                          nativeButton={false}
+                          render={
+                            <Link
+                              href={href}
+                              className="flex items-center gap-3 py-2.5 text-base text-muted-foreground transition-colors hover:text-primary"
+                            />
+                          }
+                        >
+                          <Icon size={22} stroke={1.5} />
+                          {label}
+                        </SheetClose>
+                      </li>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setCartOpen(true)}
+                      className={`${iconButtonClass} relative -ml-2 flex flex-row items-center gap-2.5`}
+                    >
+                      <IconShoppingBag size={26} stroke={1.5} />
+                      Cart
+                    </button>
+                  </ul>
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            {/* Desktop links */}
+            <ul className="hidden items-center gap-8 text-sm font-medium tracking-wide text-foreground md:flex">
+              {navLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="transition-colors hover:text-primary"
                   >
-                    <IconShoppingBag size={26} stroke={1.5} />
-                    Cart
-                  </button>
-                </ul>
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          {/* Desktop links */}
-          <ul className="hidden items-center gap-8 text-sm font-medium tracking-wide text-foreground md:flex">
-            {navLinks.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="transition-colors hover:text-primary"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Middle Section: Logo */}
-        <div className="flex shrink-0 items-center justify-center">
-          <Link className="group flex items-center justify-center" href="/">
-            <div className="relative h-14 w-28 md:h-20 md:w-36">
-              <Image
-                alt="Streekala Logo"
-                className="object-contain"
-                fill
-                sizes="(min-width: 768px) 144px, 112px"
-                src="/streekala-logo.webp"
-                priority
-              />
-            </div>
-          </Link>
-        </div>
-
-        {/* Right Section: Action Icons */}
-        <div className="flex flex-1 items-center justify-end gap-1 md:gap-4">
-          <button
-            type="button"
-            aria-label="Search"
-            aria-expanded={searchOpen}
-            aria-controls="site-search"
-            onClick={() => setSearchOpen((v) => !v)}
-            className={iconButtonClass}
-          >
-            <IconSearch size={26} stroke={1.5} />
-          </button>
-
-          {/* Account + Wishlist: desktop only (they live in the menu on mobile) */}
-          <div className="hidden md:inline-flex">
-            <AccountMenu authenticated={authenticated} />
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <Link
-            href="/wishlist"
-            aria-label="Wishlist"
-            className={`${iconButtonClass} hidden md:inline-flex`}
-          >
-            <IconHeart size={26} stroke={1.5} />
-          </Link>
+          {/* Middle Section: Logo */}
+          <div className="flex shrink-0 items-center justify-center">
+            <Link className="group flex items-center justify-center" href="/">
+              <div className="relative h-14 w-28 md:h-20 md:w-36">
+                <Image
+                  alt="Streekala Logo"
+                  className="object-contain"
+                  fill
+                  sizes="(min-width: 768px) 144px, 112px"
+                  src="/streekala-logo.webp"
+                  priority
+                />
+              </div>
+            </Link>
+          </div>
 
-          <button
-            type="button"
-            aria-label="Shopping Bag"
-            onClick={() => setCartOpen(true)}
-            className={`${iconButtonClass} relative hover:cursor-pointer`}
+          {/* Right Section: Action Icons */}
+          <div className="flex flex-1 items-center justify-end gap-1 md:gap-4">
+            <button
+              type="button"
+              aria-label="Search"
+              aria-expanded={searchOpen}
+              aria-controls="site-search"
+              onClick={() => setSearchOpen((v) => !v)}
+              className={iconButtonClass}
+            >
+              <IconSearch size={26} stroke={1.5} />
+            </button>
+
+            {/* Account + Wishlist: desktop only (they live in the menu on mobile) */}
+            <div className="hidden md:inline-flex">
+              <AccountMenu authenticated={authenticated} />
+            </div>
+
+            <Link
+              href="/wishlist"
+              aria-label="Wishlist"
+              className={`${iconButtonClass} hidden md:inline-flex relative`}
+            >
+              {wishlistItems.length > 0 && (
+                <div className="bg-primary h-3 w-3 rounded-full absolute top-1.5 right-1 border-2 border-background" />
+              )}
+              <IconHeart size={26} stroke={1.5} />
+            </Link>
+
+            <button
+              type="button"
+              aria-label="Shopping Bag"
+              onClick={() => setCartOpen(true)}
+              className={`${iconButtonClass} relative hover:cursor-pointer`}
+            >
+              <IconShoppingBag size={26} stroke={1.5} />
+              {itemCount > 0 && (
+                <div className="bg-primary h-3 w-3 rounded-full absolute top-1.5 right-1 border-2 border-background" />
+              )}
+            </button>
+          </div>
+        </div>
+        <CartSheet open={cartOpen} onOpenChange={setCartOpen} />
+      </nav>
+      <div
+        id="site-search"
+        inert={!searchOpen}
+        className={`grid w-full bg-background transition-[grid-template-rows] duration-300 ease-out ${
+          searchOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <form
+            onSubmit={handleSearch}
+            className="flex items-center gap-3 border-b border-border px-4 py-4 md:px-6"
           >
-            <IconShoppingBag size={26} stroke={1.5} />
-            {itemCount > 0 && (
-              <span
-                aria-hidden="true"
-                className="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary ring-2 ring-background"
-              />
-            )}
-          </button>
+            <IconSearch
+              size={22}
+              stroke={1.5}
+              className="text-muted-foreground"
+            />
+            <input
+              ref={searchInputRef}
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search for products..."
+              className="w-full bg-transparent text-base outline-none placeholder:text-muted-foreground"
+            />
+            <button
+              type="button"
+              aria-label="Close search"
+              onClick={() => setSearchOpen(false)}
+              className={iconButtonClass}
+            >
+              <IconX size={22} stroke={1.5} />
+            </button>
+          </form>
         </div>
       </div>
-      <CartSheet open={cartOpen} onOpenChange={setCartOpen} />
-    </nav>
-    <div
-      id="site-search"
-      inert={!searchOpen}
-      className={`grid w-full bg-background transition-[grid-template-rows] duration-300 ease-out ${
-        searchOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-      }`}
-    >
-      <div className="overflow-hidden">
-        <form
-          onSubmit={handleSearch}
-          className="flex items-center gap-3 border-b border-border px-4 py-4 md:px-6"
-        >
-          <IconSearch size={22} stroke={1.5} className="text-muted-foreground" />
-          <input
-            ref={searchInputRef}
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search for products..."
-            className="w-full bg-transparent text-base outline-none placeholder:text-muted-foreground"
-          />
-          <button
-            type="button"
-            aria-label="Close search"
-            onClick={() => setSearchOpen(false)}
-            className={iconButtonClass}
-          >
-            <IconX size={22} stroke={1.5} />
-          </button>
-        </form>
-      </div>
-    </div>
     </>
   );
 };
@@ -279,9 +292,10 @@ function AccountMenu({ authenticated }: { authenticated: boolean | null }) {
       <Link
         href="/account"
         aria-label="User Account"
-        className={iconButtonClass}
+        className={cn(iconButtonClass, "flex items-center gap-2")}
       >
-        <IconUserCircle size={26} stroke={1.5} />
+        <IconUser size={26} stroke={1.5} />
+        <span className="">Login</span>
       </Link>
     );
   }
